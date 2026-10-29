@@ -1,4 +1,4 @@
-package io.github.xoage.library;
+package io.github.xoage.library.db;
 
 import java.io.IOException;
 import java.io.InputStream;
