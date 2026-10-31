@@ -28,22 +28,32 @@ public class App {
                         book.title(), book.author().name(), book.year());
             }
 
-            printAuthors(db);
+            for (String q : new String[]{"мир","_", "\\и", "И", "гарри", "' OR '1'='1", "%"}) {
+                List<Book> found = bookDao.findByTitle(q);
+                System.out.println("[" + q + "] найдено " + found.size());
+                for (Book b : found) {
+                    System.out.println("    " + b.title() + " - " + b.author().name());
+                }
+            }
+
+//            printAuthors(db);
         } catch (SQLException e) {
             System.out.println("Ошибка базы данных: " + e.getMessage());
         }
+
+
     }
 
-    private static void printAuthors(Database db) throws SQLException {
-        String sql = "SELECT name FROM authors ORDER BY name";
-        try (Connection conn = db.getConnection();
-             Statement st = conn.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-            System.out.println();
-            System.out.println("Авторы:");
-            while (rs.next()) {
-                System.out.println("  " + rs.getString("name"));
-            }
-        }
-    }
+//    private static void printAuthors(Database db) throws SQLException {
+//        String sql = "SELECT name FROM authors ORDER BY name";
+//        try (Connection conn = db.getConnection();
+//             Statement st = conn.createStatement();
+//             ResultSet rs = st.executeQuery(sql)) {
+//            System.out.println();
+//            System.out.println("Авторы:");
+//            while (rs.next()) {
+//                System.out.println("  " + rs.getString("name"));
+//            }
+//        }
+//    }
 }

@@ -4,10 +4,7 @@ import io.github.xoage.library.db.Database;
 import io.github.xoage.library.model.Author;
 import io.github.xoage.library.model.Book;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +25,7 @@ public class BookDao {
 
     /** Все книги, по автору и году. */
     public List<Book> findAll() throws SQLException {
-        String sql = SELECT_BOOKS + " ORDER BY a.name, b.year";
+        String sql = SELECT_BOOKS + " order by a.name, b.year";
         try (Connection conn = db.getConnection();
              Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
@@ -52,5 +49,27 @@ public class BookDao {
                 author,
                 rs.getObject("year", Integer.class),
                 rs.getString("isbn"));
+    }
+
+    /** Книги, в названии которых есть часть part (без учёта регистра). */
+    public List<Book> findByTitle(String part) throws SQLException {
+        String sql = SELECT_BOOKS + " where b.title ilike ? order by b.title"; // ? шаблон с окошками значений, ковычки тоже значение
+                                                                                //ilike не учитываем регистр
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {  //вместо createStatement(): создаём «бланк» с окошками.
+
+            String escaped = part.replace("\\", "\\\\")
+                    .replace("%", "\\%").replace("_", "\\_");
+            ps.setString(1, "%" + escaped + "%"); //заполняем окошко номер 1, любые символы до и после part
+
+            try (ResultSet rs = ps.executeQuery()) { //Внутренний try закроет ResultSet, внешний закроет ps и conn.
+                                                     // ResultSet появляется только после ps.setString() и executeQuery()
+                List<Book> books = new ArrayList<>();
+                while (rs.next()) {
+                    books.add(mapRow(rs));
+                }
+                return books;
+            }
+        }
     }
 }
