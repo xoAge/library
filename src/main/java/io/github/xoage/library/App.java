@@ -1,16 +1,13 @@
 package io.github.xoage.library;
 
+import io.github.xoage.library.dao.AuthorDao;
 import io.github.xoage.library.dao.BookDao;
 import io.github.xoage.library.db.Database;
 import io.github.xoage.library.db.DatabaseInitializer;
-import io.github.xoage.library.model.Author;
-import io.github.xoage.library.model.Book;
+import io.github.xoage.library.ui.ConsoleMenu;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
+
 
 public class App {
 
@@ -19,41 +16,10 @@ public class App {
         try {
             new DatabaseInitializer(db).init();
 
-            BookDao bookDao = new BookDao(db);
-            List<Book> books = bookDao.findAll();
-
-            System.out.println("Книги в библиотеке (" + books.size() + "):");
-            for (Book book : books) {
-                System.out.printf("  %-26s %-18s %s%n",
-                        book.title(), book.author().name(), book.year());
-            }
-
-            for (String q : new String[]{"мир","_", "\\и", "И", "гарри", "' OR '1'='1", "%"}) {
-                List<Book> found = bookDao.findByTitle(q);
-                System.out.println("[" + q + "] найдено " + found.size());
-                for (Book b : found) {
-                    System.out.println("    " + b.title() + " - " + b.author().name());
-                }
-            }
-
-//            printAuthors(db);
-        } catch (SQLException e) {
+            ConsoleMenu menu = new ConsoleMenu(new BookDao(db), new AuthorDao(db));
+            menu.run();
+        } catch (SQLException e) {           //для инициализации бд new DatabaseInitializer(db).init();
             System.out.println("Ошибка базы данных: " + e.getMessage());
         }
-
-
     }
-
-//    private static void printAuthors(Database db) throws SQLException {
-//        String sql = "SELECT name FROM authors ORDER BY name";
-//        try (Connection conn = db.getConnection();
-//             Statement st = conn.createStatement();
-//             ResultSet rs = st.executeQuery(sql)) {
-//            System.out.println();
-//            System.out.println("Авторы:");
-//            while (rs.next()) {
-//                System.out.println("  " + rs.getString("name"));
-//            }
-//        }
-//    }
 }
