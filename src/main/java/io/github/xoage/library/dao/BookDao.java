@@ -72,4 +72,24 @@ public class BookDao {
             }
         }
     }
+
+    public int add(String title, int authorId, Integer year, String isbn) throws SQLException {
+        String sql = """
+            insert into books (title, author_id, year, isbn)
+            values (?, ?, ?, ?)
+            returning id
+            """; //RETURNING id - просьба сообщить нам этот номер после вставки. Не указываем свой id, чтоб не было дубликата
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, title);
+            ps.setInt(2, authorId);
+            ps.setObject(3, year, Types.INTEGER);
+            ps.setString(4, isbn);
+            try (ResultSet rs = ps.executeQuery()) {  //executeUpdate() возвращает одно число: сколько строк изменено.
+                                                      //executeQuery() возвращает таблицу результата, то есть ResultSet.
+                rs.next();                            //без while, т.к. добавляем одну книгу, RETURNING id вернёт ровно одну строку.
+                return rs.getInt("id");
+            }
+        }
+    }
 }
