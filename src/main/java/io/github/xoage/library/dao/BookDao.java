@@ -92,4 +92,32 @@ public class BookDao {
             }
         }
     }
+
+    public boolean deleteById(int id) throws SQLException {
+        String sql = "DELETE FROM books WHERE id = ?"; //WHERE id = ? - условие отбора строк: «удалить только те строки, у которых id равен вот этому значению».
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            int deleted = ps.executeUpdate();
+            return deleted > 0;
+        }
+    }
+
+    public boolean update(int id, String newTitle, Integer newYear) throws SQLException {
+        //пользователь ввёл название в ? попадает «Дни в Бирме», COALESCE берёт его;
+        //пользователь нажал Enter в ? попадает NULL, COALESCE берёт второе, то есть текущее title из этой же строки
+        String sql = """ 
+            update books
+            set title = coalesce(?, title),
+                year  = coalesce(?, year)
+            where id = ?
+            """;
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newTitle);
+            ps.setObject(2, newYear, Types.INTEGER);
+            ps.setInt(3, id);
+            return ps.executeUpdate() > 0;
+        }
+    }
 }

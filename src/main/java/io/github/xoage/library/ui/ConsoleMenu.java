@@ -26,6 +26,8 @@ public class ConsoleMenu {
             System.out.println("1 - показать все книги");
             System.out.println("2 - найти по названию");
             System.out.println("3 - добавить книгу");
+            System.out.println("4 - удалить книгу");
+            System.out.println("5 - изменить книгу");
             System.out.println("0 - выход");
             System.out.print("Выбор: ");
             String choice = scanner.nextLine().trim();
@@ -35,6 +37,8 @@ public class ConsoleMenu {
                     case "1" -> printBooks(bookDao.findAll());
                     case "2" -> search();
                     case "3" -> addBook();
+                    case "4" -> deleteBook();
+                    case "5" -> updateBook();
                     case "0" -> {
                         System.out.println("Пока!");
                         return;
@@ -92,14 +96,49 @@ public class ConsoleMenu {
         System.out.println("Книга добавлена, id = " + id);
     }
 
+    private void deleteBook() throws SQLException {
+        System.out.print("id книги для удаления: ");
+        int id = Integer.parseInt(scanner.nextLine().trim());
+
+        if (bookDao.deleteById(id)) {
+            System.out.println("Книга удалена");
+        } else {
+            System.out.println("Книги с id " + id + " нет");
+        }
+    }
+
+    private void updateBook() throws SQLException {
+        System.out.print("id книги: ");
+        int id = Integer.parseInt(scanner.nextLine().trim());
+
+        System.out.print("Новое название (Enter - оставить как есть): ");
+        String titleText = scanner.nextLine().trim();
+        String newTitle = titleText.isEmpty() ? null : titleText;
+
+        System.out.print("Новый год (Enter - оставить как есть): ");
+        String yearText = scanner.nextLine().trim();
+        Integer newYear = yearText.isEmpty() ? null : Integer.parseInt(yearText);
+
+        if (newTitle == null && newYear == null) {
+            System.out.println("Ничего не изменено");
+            return;
+        }
+
+        if (bookDao.update(id, newTitle, newYear)) {
+            System.out.println("Книга изменена");
+        } else {
+            System.out.println("Книги с id " + id + " нет");
+        }
+    }
+
     private void printBooks(List<Book> books) {
         if (books.isEmpty()) {
             System.out.println("Ничего не найдено");
             return;
         }
         for (Book book : books) {
-            System.out.printf("  %-26s %-18s %s%n",
-                    book.title(), book.author().name(),
+            System.out.printf("  %3d  %-26s %-18s %s%n",
+                    book.id(), book.title(), book.author().name(),
                     book.year() == null ? "-" : book.year());
         }
     }
