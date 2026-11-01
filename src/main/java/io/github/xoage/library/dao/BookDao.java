@@ -92,4 +92,14 @@ public class BookDao {
             }
         }
     }
+
+    public boolean deleteById(int id) throws SQLException {
+        String sql = "DELETE FROM books WHERE id = ?"; //WHERE id = ? - условие отбора строк: «удалить только те строки, у которых id равен вот этому значению».
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            int deleted = ps.executeUpdate();
+            return deleted > 0;
+        }
+    }
 }
