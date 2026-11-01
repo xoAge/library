@@ -4,6 +4,7 @@ import io.github.xoage.library.dao.AuthorDao;
 import io.github.xoage.library.dao.BookDao;
 import io.github.xoage.library.model.Author;
 import io.github.xoage.library.model.Book;
+import io.github.xoage.library.service.LibraryService;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -13,11 +14,13 @@ public class ConsoleMenu {
 
     private final BookDao bookDao;
     private final AuthorDao authorDao;
+    private final LibraryService service;
     private final Scanner scanner = new Scanner(System.in);
 
-    public ConsoleMenu(BookDao bookDao, AuthorDao authorDao) {
+    public ConsoleMenu(BookDao bookDao, AuthorDao authorDao, LibraryService service) {
         this.bookDao = bookDao;
         this.authorDao = authorDao;
+        this.service = service;
     }
 
     public void run() {
@@ -28,6 +31,7 @@ public class ConsoleMenu {
             System.out.println("3 - добавить книгу");
             System.out.println("4 - удалить книгу");
             System.out.println("5 - изменить книгу");
+            System.out.println("6 - добавить книгу нового автора");
             System.out.println("0 - выход");
             System.out.print("Выбор: ");
             String choice = scanner.nextLine().trim();
@@ -39,6 +43,7 @@ public class ConsoleMenu {
                     case "3" -> addBook();
                     case "4" -> deleteBook();
                     case "5" -> updateBook();
+                    case "6" -> addBookWithNewAuthor();
                     case "0" -> {
                         System.out.println("Пока!");
                         return;
@@ -60,7 +65,7 @@ public class ConsoleMenu {
         }
         return switch (state) {
             case "23503" -> "нет автора с таким номером";
-            case "23505" -> "книга с таким ISBN уже есть";
+            case "23505" -> "такая запись уже есть: автор с таким именем или книга с таким ISBN";
             case "23514" -> "название не может быть пустым, год - от 1450 до 2100";
             default -> "база данных ответила: " + e.getMessage();
         };
@@ -129,6 +134,25 @@ public class ConsoleMenu {
         } else {
             System.out.println("Книги с id " + id + " нет");
         }
+    }
+
+    private void addBookWithNewAuthor() throws SQLException {
+        System.out.print("Имя нового автора: ");
+        String authorName = scanner.nextLine().trim();
+
+        System.out.print("Название книги: ");
+        String title = scanner.nextLine().trim();
+
+        System.out.print("Год (Enter - неизвестен): ");
+        String yearText = scanner.nextLine().trim();
+        Integer year = yearText.isEmpty() ? null : Integer.parseInt(yearText);
+
+        System.out.print("ISBN (Enter - нет): ");
+        String isbnText = scanner.nextLine().trim();
+        String isbn = isbnText.isEmpty() ? null : isbnText;
+
+        int bookId = service.addBookWithNewAuthor(authorName, title, year, isbn);
+        System.out.println("Автор и книга добавлены, id книги = " + bookId);
     }
 
     private void printBooks(List<Book> books) {
