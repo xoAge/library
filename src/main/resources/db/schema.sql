@@ -3,7 +3,7 @@
 
 create table if not exists authors (
     id   integer generated always as identity primary key,
-    name varchar(50) not null unique
+    name varchar(50) not null unique check (length(trim(name)) > 0)
 );
 
 create table if not exists books (
