@@ -30,4 +30,14 @@ public class AuthorDao {
         }
         return authors;
     }
+    public int add(Connection conn, String name) throws SQLException {
+        String sql = "insert into authors (name) values (?) returning id";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getInt("id");
+            }
+        }
+    }
 }
