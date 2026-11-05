@@ -1,14 +1,12 @@
--- Начальные данные. Выполняется только один раз — когда таблица авторов пуста.
-
-INSERT INTO authors (name) VALUES
+insert into authors (name) values
                                ('Лев Толстой'),
                                ('Фёдор Достоевский'),
                                ('Михаил Булгаков'),
                                ('Джордж Оруэлл');
 
-INSERT INTO books (title, author_id, year)
-SELECT b.title, a.id, b.year
-FROM (VALUES
+insert into books (title, author_id, year)
+select b.title, a.id, b.year
+from (values
           ('Война и мир',              'Лев Толстой',       1869),
           ('Анна Каренина',            'Лев Толстой',       1878),
           ('Преступление и наказание', 'Фёдор Достоевский', 1866),
@@ -16,5 +14,5 @@ FROM (VALUES
           ('Мастер и Маргарита',       'Михаил Булгаков',   1967),
           ('1984',                     'Джордж Оруэлл',     1949),
           ('Скотный двор',             'Джордж Оруэлл',     1945)
-     ) AS b (title, author, year)
-         JOIN authors a ON a.name = b.author;
+     ) as b (title, author, year)
+         join authors a on a.name = b.author;

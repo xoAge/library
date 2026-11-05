@@ -1,0 +1,1 @@
+create index idx_books_title on books (title)

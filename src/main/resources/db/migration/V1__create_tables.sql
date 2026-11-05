@@ -1,12 +1,10 @@
 -- Схема базы "Домашняя библиотека".
--- IF NOT EXISTS
-
-create table if not exists authors (
+create table authors (
     id   integer generated always as identity primary key,
     name varchar(50) not null unique check (length(trim(name)) > 0)
 );
 
-create table if not exists books (
+create table books (
     id        integer generated always as identity primary key,
     title     varchar(100) not null check (length(trim(title)) > 0),
     author_id integer      not null references authors (id),
@@ -14,4 +12,4 @@ create table if not exists books (
     isbn      varchar(17)  unique
 );
 
-create index if not exists idx_books_author_id on books (author_id);
+create index idx_books_author_id on books (author_id);
