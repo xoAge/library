@@ -29,7 +29,7 @@
 
 ## Технологии
 
-- Java, Maven
+- Java 21+, Maven
 - PostgreSQL, JDBC (`PreparedStatement`, транзакции)
 - HikariCP - пул соединений
 - Flyway - миграции схемы базы
