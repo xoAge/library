@@ -13,8 +13,7 @@ import java.sql.SQLException;
 public class App {
 
     public static void main(String[] args) {
-        Database db = Database.fromConfig();
-        try {
+        try (Database db = Database.fromConfig()) {
             new DatabaseInitializer(db).init();
 
             BookDao bookDao = new BookDao(db);

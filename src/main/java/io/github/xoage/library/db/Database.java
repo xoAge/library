@@ -1,27 +1,24 @@
 package io.github.xoage.library.db;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-public final class Database {
+public final class Database implements AutoCloseable {
 
     private static final String CONFIG_FILE = "db.properties";
 
-    private final String url;
-    private final String user;
-    private final String password;
+    private final HikariDataSource dataSource;             //пулл
 
-    private Database(String url, String user, String password) {
-        this.url = url;
-        this.user = user;
-        this.password = password;
+    private Database(HikariDataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
-    /** Читает настройки из db.properties (лежит в src/main/resources). */
     public static Database fromConfig() {
         Properties props = new Properties();
         try (InputStream in = Database.class.getClassLoader().getResourceAsStream(CONFIG_FILE)) {
@@ -33,10 +30,14 @@ public final class Database {
         } catch (IOException e) {
             throw new IllegalStateException("Не удалось прочитать " + CONFIG_FILE, e);
         }
-        return new Database(
-                required(props, "db.url"),
-                required(props, "db.user"),
-                required(props, "db.password"));
+        HikariConfig config = new HikariConfig();     //куда подключаться
+        config.setJdbcUrl(required(props, "db.url"));
+        config.setUsername(required(props, "db.user"));
+        config.setPassword(required(props, "db.password"));
+        config.setMaximumPoolSize(5);          // не больше 5 соединений одновременно
+        config.setPoolName("library-pool");    // имя пула в логах
+
+        return new Database(new HikariDataSource(config));
     }
 
     private static String required(Properties props, String key) {
@@ -48,10 +49,12 @@ public final class Database {
     }
 
     public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(url, user, password);
+        return dataSource.getConnection();                // берём соединение
     }
 
-    public String url() {
-        return url;
+    @Override
+    public void close() {
+        dataSource.close();                    // закрываем весь пул при выходе
     }
+
 }

@@ -26,7 +26,7 @@
             <version>7.1.0</version>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
+            <groupId>org.slf4j</groupId>              <!-- Для сообщений -->
             <artifactId>slf4j-simple</artifactId>
             <version>2.0.17</version>
         </dependency>
