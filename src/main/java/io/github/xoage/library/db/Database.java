@@ -34,7 +34,7 @@ public final class Database implements AutoCloseable {
         config.setJdbcUrl(required(props, "db.url"));
         config.setUsername(required(props, "db.user"));
         config.setPassword(required(props, "db.password"));
-        config.setMaximumPoolSize(5);          // не больше 5 соединений одновременно
+        config.setMaximumPoolSize(intProperty(props, "db.pool.size", 5));
         config.setPoolName("library-pool");    // имя пула в логах
 
         return new Database(new HikariDataSource(config));
@@ -46,6 +46,22 @@ public final class Database implements AutoCloseable {
             throw new IllegalStateException("В " + CONFIG_FILE + " нет настройки " + key);
         }
         return value.trim();
+    }
+
+    private static int intProperty(Properties props, String key, int defaultValue) {
+        String value = props.getProperty(key);
+        if (value == null || value.isBlank()) {
+            return defaultValue;                       // ключа нет - берём значение по умолчанию
+        }
+        try {
+            int number = Integer.parseInt(value.trim());
+            if (number < 1) {
+                throw new IllegalStateException(key + " должен быть больше 0, сейчас: " + number);
+            }
+            return number;
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException(key + " должен быть целым числом, сейчас: \"" + value + "\"", e);
+        }
     }
 
     public Connection getConnection() throws SQLException {
