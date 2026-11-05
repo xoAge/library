@@ -13,8 +13,6 @@ public class App {
         try (Database db = Database.fromConfig()) {
             Flyway.configure()
                     .dataSource(db.dataSource())
-                    .baselineOnMigrate(true)    // база уже не пустая, считать её версией 2
-                    .baselineVersion("2")
                     .load()                     //собрать готовый объект
                     .migrate();
 
@@ -24,6 +22,9 @@ public class App {
 
             ConsoleMenu menu = new ConsoleMenu(bookDao, authorDao, service);
             menu.run();
+        } catch (RuntimeException e) {
+            System.out.println("Не удалось запустить программу: " + e.getMessage());
+            System.out.println("Проверь, что PostgreSQL запущен и настройки в db.properties верные.");
         }
     }
 }
