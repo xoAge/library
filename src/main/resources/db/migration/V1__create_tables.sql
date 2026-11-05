@@ -1,0 +1,15 @@
+-- Схема базы "Домашняя библиотека".
+create table authors (
+    id   integer generated always as identity primary key,
+    name varchar(50) not null unique check (length(trim(name)) > 0)
+);
+
+create table books (
+    id        integer generated always as identity primary key,
+    title     varchar(100) not null check (length(trim(title)) > 0),
+    author_id integer      not null references authors (id),
+    year      integer      check (year between 1450 and 2100),
+    isbn      varchar(17)  unique
+);
+
+create index idx_books_author_id on books (author_id);
