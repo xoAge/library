@@ -3,6 +3,7 @@ package io.github.xoage.library.ui;
 import io.github.xoage.library.dao.AuthorDao;
 import io.github.xoage.library.dao.BookDao;
 import io.github.xoage.library.model.Author;
+import io.github.xoage.library.model.AuthorStats;
 import io.github.xoage.library.model.Book;
 import io.github.xoage.library.service.LibraryService;
 
@@ -33,6 +34,7 @@ public class ConsoleMenu {
             System.out.println("5 - изменить книгу");
             System.out.println("6 - добавить книгу нового автора");
             System.out.println("7 - найти по автору");
+            System.out.println("8 - авторы и число книг");
             System.out.println("0 - выход");
             System.out.print("Выбор: ");
             String choice = scanner.nextLine().trim();
@@ -46,6 +48,7 @@ public class ConsoleMenu {
                     case "5" -> updateBook();
                     case "6" -> addBookWithNewAuthor();
                     case "7" -> searchByAuthor();
+                    case "8" -> printAuthorStats();
                     case "0" -> {
                         System.out.println("Пока!");
                         return;
@@ -84,6 +87,12 @@ public class ConsoleMenu {
         System.out.print("Часть имени автора: ");
         String part = scanner.nextLine().trim();
         printBooks(bookDao.findByAuthor(part));
+    }
+
+    private void printAuthorStats() throws SQLException {
+        for (AuthorStats stats : authorDao.findAllWithBookCount()) {
+            System.out.printf("%-25s книг: %d%n", stats.name(), stats.bookCount());
+        }
     }
 
     private void addBook() throws SQLException {

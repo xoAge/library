@@ -2,11 +2,9 @@ package io.github.xoage.library.dao;
 
 import io.github.xoage.library.db.Database;
 import io.github.xoage.library.model.Author;
+import io.github.xoage.library.model.AuthorStats;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +36,27 @@ public class AuthorDao {
                 rs.next();
                 return rs.getInt("id");
             }
+        }
+    }
+
+    /** Все авторы с количеством книг, включая авторов без книг. */
+    public List<AuthorStats> findAllWithBookCount() throws SQLException {
+        String sql = """
+            select a.name, count(b.id) AS book_count
+            from authors a
+            left join books b on b.author_id = a.id
+            group by a.id, a.name
+            order by book_count desc, a.name
+            """;
+        try (Connection conn = db.getConnection();
+             Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+
+            List<AuthorStats> result = new ArrayList<>();
+            while (rs.next()) {
+                result.add(new AuthorStats(rs.getString("name"), rs.getInt("book_count")));
+            }
+            return result;
         }
     }
 }
