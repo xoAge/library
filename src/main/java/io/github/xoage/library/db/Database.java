@@ -3,6 +3,7 @@ package io.github.xoage.library.db;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -17,6 +18,10 @@ public final class Database implements AutoCloseable {
 
     private Database(HikariDataSource dataSource) {
         this.dataSource = dataSource;
+    }
+
+    public DataSource dataSource() {
+        return dataSource;
     }
 
     public static Database fromConfig() {
