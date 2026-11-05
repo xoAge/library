@@ -51,19 +51,18 @@ public class BookDao {
                 rs.getString("isbn"));
     }
 
-    /** Книги, в названии которых есть часть part (без учёта регистра). */
-    public List<Book> findByTitle(String part) throws SQLException {
-        String sql = SELECT_BOOKS + " where b.title ilike ? order by b.title"; // ? шаблон с окошками значений, ковычки тоже значение
-                                                                                //ilike не учитываем регистр
+    /** Текст пользователя → шаблон для ILIKE: %часть% с экранированными \ % _ */
+    private static String likePattern(String part) {
+        String escaped = part.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+        return "%" + escaped + "%";
+    }
+
+    /** Выполнить запрос с одним параметром-шаблоном и собрать книги. */
+    private List<Book> findByPattern(String sql, String part) throws SQLException {
         try (Connection conn = db.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {  //вместо createStatement(): создаём «бланк» с окошками.
-
-            String escaped = part.replace("\\", "\\\\")
-                    .replace("%", "\\%").replace("_", "\\_");
-            ps.setString(1, "%" + escaped + "%"); //заполняем окошко номер 1, любые символы до и после part
-
-            try (ResultSet rs = ps.executeQuery()) { //Внутренний try закроет ResultSet, внешний закроет ps и conn.
-                                                     // ResultSet появляется только после ps.setString() и executeQuery()
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, likePattern(part));
+            try (ResultSet rs = ps.executeQuery()) {
                 List<Book> books = new ArrayList<>();
                 while (rs.next()) {
                     books.add(mapRow(rs));
@@ -71,6 +70,16 @@ public class BookDao {
                 return books;
             }
         }
+    }
+
+    /** Книги, в названии которых есть part (без учёта регистра). */
+    public List<Book> findByTitle(String part) throws SQLException {
+        return findByPattern(SELECT_BOOKS + " where b.title ilike ? order by b.title", part);
+    }
+
+    /** Книги авторов, в имени которых есть part (без учёта регистра). */
+    public List<Book> findByAuthor(String part) throws SQLException {
+        return findByPattern(SELECT_BOOKS + " where a.name ilike ? order by a.name, b.year", part);
     }
 
     public int add(String title, int authorId, Integer year, String isbn) throws SQLException { //одна транзакция, соединение закрывает тот, кто открыл

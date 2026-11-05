@@ -32,6 +32,7 @@ public class ConsoleMenu {
             System.out.println("4 - удалить книгу");
             System.out.println("5 - изменить книгу");
             System.out.println("6 - добавить книгу нового автора");
+            System.out.println("7 - найти по автору");
             System.out.println("0 - выход");
             System.out.print("Выбор: ");
             String choice = scanner.nextLine().trim();
@@ -44,6 +45,7 @@ public class ConsoleMenu {
                     case "4" -> deleteBook();
                     case "5" -> updateBook();
                     case "6" -> addBookWithNewAuthor();
+                    case "7" -> searchByAuthor();
                     case "0" -> {
                         System.out.println("Пока!");
                         return;
@@ -76,6 +78,12 @@ public class ConsoleMenu {
         String part = scanner.nextLine().trim(); //nextInt() читает число, а Enter после него оставляет во вводе.
                                                 // Следующий nextLine() подхватывает этот пустой Enter, поэтому везде nextLine()
         printBooks(bookDao.findByTitle(part));
+    }
+
+    private void searchByAuthor() throws SQLException {
+        System.out.print("Часть имени автора: ");
+        String part = scanner.nextLine().trim();
+        printBooks(bookDao.findByAuthor(part));
     }
 
     private void addBook() throws SQLException {
